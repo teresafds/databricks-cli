@@ -265,6 +265,32 @@ def permanent_delete_cli(api_client, cluster_id):
     ClusterApi(api_client).permanent_delete(cluster_id)
 
 
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option('--cluster-id', required=True, type=ClusterIdClickType(),
+              help=ClusterIdClickType.help)
+@click.option('--start-time', required=False, default=None, type=int,
+              help="The start time in epoch milliseconds. If empty, returns events starting from the beginning of time.")
+@click.option('--end-time', required=False, default=None, type=int,
+              help="The end time in epoch milliseconds. If empty, returns events up to the current time.")
+@click.option('--order', required=False, default=None, type=str,
+              help="The order to list events in; either ASC or DESC. Defaults to DESC.")
+@click.option('--event-types', required=False, default=None, type=str,
+              help="An optional set of event types to filter on. If empty, all event types are returned.")
+@click.option('--offset', required=False, default=None, type=int,
+              help="The offset in the result set. Defaults to 0 (no offset).")
+@click.option('--limit', required=False, default=None, type=int,
+              help="The maximum number of events to include in a page of events. If non specified, it will return all the events.")
+@debug_option
+@profile_option
+@eat_exceptions
+@provide_api_client
+def get_events_cli(api_client, cluster_id):
+    """
+    Retrieves a list of events about the activity of a cluster.
+    """
+    click.echo(pretty_format(ClusterApi(api_client).get_events(cluster_id)))
+
+
 @click.group(context_settings=CONTEXT_SETTINGS,
              short_help='Utility to interact with Databricks clusters.')
 @click.option('--version', '-v', is_flag=True, callback=print_version_callback,
@@ -291,3 +317,4 @@ clusters_group.add_command(list_zones_cli, name='list-zones')
 clusters_group.add_command(list_node_types_cli, name='list-node-types')
 clusters_group.add_command(spark_versions_cli, name='spark-versions')
 clusters_group.add_command(permanent_delete_cli, name='permanent-delete')
+clusters_group.add_command(get_events_cli, name='get-events')
